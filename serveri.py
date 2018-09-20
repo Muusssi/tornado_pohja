@@ -16,9 +16,10 @@ def load_config_file(config_file):
         return json.load(f)
 
 class Application(tornado.web.Application):
-    def __init__(self, database, config):
+    def __init__(self, database):
         handlers = [
                 (r"/", MainPageHandler),
+                (r"/demo", DemoHandler),
             ]
 
         settings = dict(
@@ -29,8 +30,6 @@ class Application(tornado.web.Application):
         self.database = database
         tornado.web.Application.__init__(self, handlers, **settings)
 
-
-
 class BaseHandler(tornado.web.RequestHandler):
     @property
     def db(self):
@@ -40,18 +39,17 @@ class MainPageHandler(BaseHandler):
     def get(self):
         self.render('main_page.html')
 
+class DemoHandler(BaseHandler):
+    def get(self):
+        self.render('processing_demo.html')
+
 
 if __name__ == "__main__":
     if (len(sys.argv) != 2):
-        print "error: missing config file"
-        exit(0)
+        exit(1)
     config = load_config_file(sys.argv[1])
-    httpserver = tornado.httpserver.HTTPServer(
-            Application(
-                    db.Database(config['database'], config['host'], config['user'], config['password']),
-                    config,
-                )
-        )
+    application = Application(db.Database(config['database'], config['host'], config['user'], config['password']))
+    httpserver = tornado.httpserver.HTTPServer(application)
     httpserver.listen(int(config['port']))
     print("Server listening port {}".format(config['port']))
     tornado.ioloop.IOLoop.current().start()

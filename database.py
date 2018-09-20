@@ -14,6 +14,12 @@ class Database(object):
     def _cursor(self):
         return self._conn.cursor()
 
+    def save_high_score(self, game):
+        # TODO
+        if self._conn:
+            pass
+        else:
+            pass
 
 
 if __name__ == '__main__':
